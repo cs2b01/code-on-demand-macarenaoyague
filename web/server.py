@@ -18,6 +18,7 @@ def static_content(content):
     return render_template(content)
 
 
+
 @app.route('/users', methods = ['GET'])
 def get_users():
     session = db.getSession(engine)
@@ -26,7 +27,6 @@ def get_users():
     for user in dbResponse:
         data.append(user)
     return Response(json.dumps(data, cls=connector.AlchemyEncoder), mimetype='application/json')
-
 
 @app.route('/users/<id>', methods = ['GET'])
 def get_user(id):
@@ -61,9 +61,61 @@ def create_user():
     session.commit()
     return 'Created User'
 
+
+
+@app.route('/messages', methods = ['GET'])
+def get_messages():
+    session = db.getSession(engine)
+    dbResponse = session.query(entities.Message)
+    data = []
+    for message in dbResponse:
+        data.append(message)
+    return Response(json.dumps(data, cls=connector.AlchemyEncoder), mimetype='application/json')
+
+@app.route('/messages', methods = ['POST'])
+def create_message():
+    c =  json.loads(request.form['values'])
+    session = db.getSession(engine)
+    content = c['content']
+    user_from_id = c['user_from_id']
+    user_to_id = c['user_to_id']
+    message = entities.Message(
+        content=content,
+        user_from_id=user_from_id,
+        user_to_id=user_to_id,
+    )
+    session.add(message)
+    session.commit()
+    return 'Created Message'
+
+@app.route('/messages', methods = ['PUT'])
+def update_message():
+    session = db.getSession(engine)
+    id = request.form['key']
+    message = session.query(entities.Message).filter(entities.Message.id == id).first()
+    c =  json.loads(request.form['values'])
+    for key in c.keys():
+        setattr(message, key, c[key])
+    session.add(message)
+    session.commit()
+    return 'Updated Message'
+
+@app.route('/messages', methods = ['DELETE'])
+def delete_message():
+    id = request.form['key']
+    session = db.getSession(engine)
+    messages = session.query(entities.Message).filter(entities.Message.id == id)
+    for message in messages:
+        session.delete(message)
+    session.commit()
+    return "Deleted Message"
+
+
+
+
 @app.route('/authenticate', methods = ["POST"])
 def authenticate():
-    time.sleep(8)
+    time.sleep(3)
     message = json.loads(request.data)
     username = message['username']
     password = message['password']
@@ -80,6 +132,22 @@ def authenticate():
         message = {'message': 'Unauthorized'}
         return Response(message, status=401, mimetype='application/json')
 
+
+@app.route('/sendmessage', methods = ['POST'])
+def send_message():
+    message = json.loads(request.data)
+    content = message['content']
+    user_from_id = message['user_from_id']
+    user_to_id = message['user_to_id']
+    session = db.getSession(engine)
+    add = entities.Message(
+        content=content,
+        user_from_id=user_from_id,
+        user_to_id=user_to_id,
+    )
+    session.add(add)
+    session.commit()
+    return 'Message Sent'
 
 if __name__ == '__main__':
     app.secret_key = ".."
