@@ -11,19 +11,43 @@
 </head>
 <body onload="whoami()">
 
-<table width="100%" border="1px solid">
+<table width="100%" >
+
     <tr>
         <td width="25%">
             <div  class="alert alert-primary" role="alert">
-                <label id="cu_username"></label>
-                <br/>
-                <label id="cu_name"></label>
+                <label id="cu_name" onclick="changeNameLoad()" ></label>
+                <input id="inputChange" type="text" placeholder="Change name..." style="display:none">
+                <button id="buttonChange" onclick="changeName()" type="button" class="btn btn-outline-dark btn-sm" style="display:none">Change</button>
+                <button id="cancelChange" onclick="cancelChange()" type="button" class="btn btn-outline-primary btn-sm" style="display:none">Cancel</button>
             </div>
-            <div id="allusers">
-
-            </div>
-
         </td>
+        <td width="75%">
+        </td>
+    </tr>
+
+    <tr>
+        <td width="25%">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              <label class="btn btn-secondary active">
+                <input type="radio" name="options" id="option1" autocomplete="off" checked> Chats
+              </label>
+              <label class="btn btn-secondary">
+                <input type="radio" name="options" id="option2" autocomplete="off"> Family
+              </label>
+              <label class="btn btn-secondary">
+                <input type="radio" name="options" id="option3" autocomplete="off"> Friends
+              </label>
+              <label class="btn btn-secondary">
+                <input type="radio" name="options" id="option4" autocomplete="off"> Favorites
+              </label>
+            </div>
+
+
+            <div id="allusers">
+            </div>
+        </td>
+
         <td width="75%">
             <div id="div" style="display:none">
                 <div id="from" height="20%"></div>

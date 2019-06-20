@@ -3,6 +3,7 @@ from database import connector
 from model import entities
 import json
 import time
+from operator import itemgetter, attrgetter
 
 db = connector.Manager()
 engine = db.createEngine()
@@ -28,6 +29,7 @@ def get_users():
         data.append(user)
     return Response(json.dumps(data, cls=connector.AlchemyEncoder), mimetype='application/json')
 
+"""
 @app.route('/users/<id>', methods = ['GET'])
 def get_user(id):
     db_session = db.getSession(engine)
@@ -46,6 +48,7 @@ def create_test_users():
     db_session.add(user)
     db_session.commit()
     return "Test user created!"
+"""
 
 @app.route('/users', methods = ['POST'])
 def create_user():
@@ -62,7 +65,7 @@ def create_user():
     return 'Created User'
 
 
-"""
+
 @app.route('/messages', methods = ['GET'])
 def get_messages():
     session = db.getSession(engine)
@@ -71,7 +74,7 @@ def get_messages():
     for message in dbResponse:
         data.append(message)
     return Response(json.dumps(data, cls=connector.AlchemyEncoder), mimetype='application/json')
-"""
+
 
 @app.route('/messages', methods = ['POST'])
 def create_message():
@@ -151,7 +154,7 @@ def logout():
 
 
 @app.route('/messages/<user_from_id>/<user_to_id>', methods = ['GET'])
-def get_messages(user_from_id, user_to_id ):
+def get_message(user_from_id, user_to_id ):
     db_session = db.getSession(engine)
     messages = db_session.query(entities.Message).filter(
         entities.Message.user_from_id == user_from_id).filter(
@@ -160,6 +163,13 @@ def get_messages(user_from_id, user_to_id ):
     data = []
     for message in messages:
         data.append(message)
+    messages = db_session.query(entities.Message).filter(
+        entities.Message.user_from_id == user_to_id).filter(
+        entities.Message.user_to_id == user_from_id
+    )
+    for message in messages:
+        data.append(message)
+    data = sorted(data, key=attrgetter('sent_on'), reverse=False)
     return Response(json.dumps(data, cls=connector.AlchemyEncoder), mimetype='application/json')
 
 
@@ -180,7 +190,17 @@ def send_message():
     session.commit()
     return 'Message Sent'
 
-
+"""
+@app.route('/changename', methods = ['PUT'])
+def change_name():
+    message = json.loads(request.data)
+    name = message['name']
+    id = message['id']
+    session = db.getSession(engine)
+    user = session.query(entities.Message).filter(entities.User.id == id).first()
+    setattr(message,'name',name)
+    return 'Name changed'
+"""
 
 if __name__ == '__main__':
     app.secret_key = ".."
